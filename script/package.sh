@@ -1,11 +1,12 @@
 #!/bin/bash
 
-SOURCE_PATH=`pwd`
+ROOT_PATH=`pwd`
+SOURCE_PATH="${ROOT_PATH}/src"
 MAIN_PATH="${SOURCE_PATH}/main"
 
 CURRENT_TIMESTAMP=$(date +%s)
 
-TARGET_PATH="${SOURCE_PATH}/target"
+TARGET_PATH="${ROOT_PATH}/target"
 
 AGENT_PATH="${TARGET_PATH}/agent"
 TARGET_CLASS_PATH="${TARGET_PATH}/classes"

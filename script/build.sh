@@ -1,6 +1,7 @@
 #!/bin/bash
 
-SOURCE_PATH=`pwd`
+ROOT_PATH=`pwd`
+SOURCE_PATH="${ROOT_PATH}/src"
 MAIN_PATH="${SOURCE_PATH}/main"
 JAVA_SOURCE_PATH="${MAIN_PATH}/java"
 PROCESSOR_PATH="${MAIN_PATH}/procesor"
@@ -9,7 +10,7 @@ AGENT_META_PATH="${AGENT_PATH}/META-INF"
 
 CURRENT_TIMESTAMP=$(date +%s)
 
-TARGET_PATH="${SOURCE_PATH}/target"
+TARGET_PATH="${ROOT_PATH}/target"
 TARGET_CLASS_PATH="${TARGET_PATH}/classes"
 
 if [ ! -d "${TARGET_PATH}" ]; then

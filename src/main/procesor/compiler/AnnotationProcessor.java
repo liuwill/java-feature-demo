@@ -43,7 +43,6 @@ public class AnnotationProcessor extends AbstractProcessor {
       SourceBuild annotation = elem.getAnnotation(SourceBuild.class);
       String message = "annotation found in " + elem.getSimpleName() + " with  " + annotation.value();
       // addToString(elem);
-      System.out.println("===================");
       this.messager.printMessage(Diagnostic.Kind.NOTE, message);
     }
     return true; // no further processing of this annotation type

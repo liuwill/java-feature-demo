@@ -48,12 +48,14 @@ buildAgent () {
   cd ${AGENT_PATH}
   javac Agent.java -d ${TARGET_PATH}/agent
   cd ${TARGET_PATH}/agent
-  jar -cvfm ${TARGET_PATH}/agent/Agent.jar ${TARGET_PATH}/agent/META-INF/MANIFEST.MF Agent.class
+  jar -cvfm ${TARGET_PATH}/agent/Agent.jar ${TARGET_PATH}/agent/META-INF/MANIFEST.MF *.class
   cd ${previousPath}
 }
 
 # Build AnnotationProcessor
-javac -cp ${PROCESSOR_PATH} -d ${TARGET_CLASS_PATH} ${PROCESSOR_PATH}/**/*.java
+BUILD_PROCESSOR_COMMAND="javac -cp ${PROCESSOR_PATH} -d ${TARGET_CLASS_PATH} ${PROCESSOR_PATH}/**/*.java"
+echo "${BUILD_PROCESSOR_COMMAND}"
+$(${BUILD_PROCESSOR_COMMAND})
 
 # 统计文件 `META-INF/services/javax.annotation.processing.Processor` 的行数
 LINE_NUM=$(cat ${JAVA_SOURCE_PATH}/META-INF/services/javax.annotation.processing.Processor | wc -l)
@@ -61,7 +63,10 @@ LINE_NUM=$((LINE_NUM+1))
 
 PROCESSORS=$(cat ${JAVA_SOURCE_PATH}/META-INF/services/javax.annotation.processing.Processor | awk '{ { printf $0 } if(NR < "'"${LINE_NUM}"'") { printf "," } }')
 
-javac -cp ${JAVA_SOURCE_PATH}:${TARGET_CLASS_PATH} -d ${TARGET_CLASS_PATH} -processor ${PROCESSORS} ${JAVA_SOURCE_PATH}/**/*.java
+# Build Main-Class with processor
+BUILD_MAIN_COMMAND="javac -cp ${JAVA_SOURCE_PATH}:${TARGET_CLASS_PATH} -d ${TARGET_CLASS_PATH} -processor ${PROCESSORS} ${JAVA_SOURCE_PATH}/**/*.java"
+echo "${BUILD_MAIN_COMMAND}"
+$(${BUILD_MAIN_COMMAND})
 # -proc:none
 
 if [ "${DEMETER_BUILD_MODE}" = "agent" ]; then

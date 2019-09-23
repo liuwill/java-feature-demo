@@ -34,10 +34,25 @@ public class Run {
     return name;
   }
 
+  /**
+   * 使用classLoader加载类，实例化之前不会执行静态代码块
+   * @throws Exception
+   */
   public static void runClassLoader() throws Exception {
-    System.out.println("============ ClassLoader ============");
+    System.out.println("============ Run ClassLoader ============");
+    Run.class.getClassLoader().loadClass("runner.Counter");
+    System.out.println("After Load, Without static");
+  }
+
+  /**
+   * 使用Class.forName加载类，加载的同时执行静态代码块
+   * @throws Exception
+   */
+  public static void runClassForName() throws Exception {
+    System.out.println("============ Run ClassForName ============");
     Class CounterClass = Class.forName("runner.Counter");
 
+    System.out.println("After Load, static Running");
     Object counter = CounterClass.newInstance();
     for (Method method : CounterClass.getDeclaredMethods()) {
       System.out.println("getName:" + method.getName());
@@ -103,6 +118,7 @@ public class Run {
       }
 
       Run.runClassLoader();
+      Run.runClassForName();
       Run.runThread();
       Run.runThreadPool(run);
     } catch (Exception e) {

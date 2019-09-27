@@ -4,9 +4,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ExecutorService;
 import java.util.Arrays;
+import java.util.StringJoiner;
 import java.util.concurrent.CountDownLatch;
 
 import core.annotations.AutoRun;
@@ -17,6 +21,7 @@ public class Run {
   public String open = "open";
   public Integer count = 0;
   public static String silence = "silence";
+  private static ThreadLocal<String> localName = new ThreadLocal<>();
 
   private String name;
 
@@ -63,9 +68,25 @@ public class Run {
   public static void runThread() throws Exception {
     System.out.println("============ Thread ============");
     Thread thread = new Thread(() -> {
-      System.out.println("** Runnable.run **");
+      localName.set(Thread.currentThread().getName());
+      System.out.println("** Runnable.run ** [" + localName.get() + "]");
     });
     thread.start();
+  }
+
+  public static void runForkJoin() throws Exception {
+    System.out.println("============ ForkJoin Start ============");
+    ForkJoinPool forkJoinPool = new ForkJoinPool();
+    AtomicInteger atomicInteger = new AtomicInteger(0);
+
+    ForkJoinTask<Integer> result = forkJoinPool.submit(() -> {
+      System.out.println("Process:" + atomicInteger.getAndIncrement());
+      return atomicInteger.getAndIncrement();
+    });
+
+    System.out.println("ForkJoin-invoke:" + forkJoinPool.invoke(result));
+    System.out.println("ForkJoin-get:" + result.get());
+    System.out.println("============ ForkJoin End ============");
   }
 
   public static void runThreadPool(Run run) throws Exception {
@@ -80,10 +101,19 @@ public class Run {
         public void run() {
           System.out.println("Asynchronous Start:" + current + ":" + atom.intValue());
           try {
+            localName.set("ThreadLocal:" + current);
             Thread.sleep(100);
           } catch (Exception e) {
           }
-          System.out.println("Asynchronous task:" + current + ":" + atom.incrementAndGet() + ":" + run.count++);
+          System.out.println(localName.get());
+          StringJoiner output = new StringJoiner(":");
+          // System.out.println("Asynchronous task:" + current + ":" + atom.incrementAndGet() + ":" + run.count++);
+          output.add("Asynchronous task");
+          output.add(Integer.toString(current));
+          output.add(Integer.toString(run.count++));
+          output.add(Integer.toString(atom.incrementAndGet()));
+          output.add(localName.get());
+          System.out.println(output.toString());
           latch.countDown();
         }
       });
@@ -121,6 +151,7 @@ public class Run {
       Run.runClassForName();
       Run.runThread();
       Run.runThreadPool(run);
+      Run.runForkJoin();
     } catch (Exception e) {
       e.printStackTrace();
     }
